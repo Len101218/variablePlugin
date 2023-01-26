@@ -1,4 +1,5 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import *  as fs from'fs';
 
 // Remember to rename these classes and interfaces!
 
@@ -12,14 +13,29 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
+	
+	
+        translate (key) {
+		const content = fs.readFileSync('/home/len1218/Documents/experimental/Dictionary.md','utf-8');
+		const arr = content.split(/\r?\n/);
+		let ret = key;
+		arr.forEach((line) =>{
+			line = line.replaceAll(" ","");
+			let k = line.split(":")[0];
+			let v = line.split(":")[1];
+			if(k == key){ret = v;}
+		});
+	        return ret;
+	}
 
 	async onload() {
+		new Notice('onload()');
 		await this.loadSettings();
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
+			new Notice('edited i dont knwo if i can find this');
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
@@ -38,11 +54,11 @@ export default class MyPlugin extends Plugin {
 		});
 		// This adds an editor command that can perform some operation on the current editor instance
 		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
+			id: 'dictionary-editor-command',
+			name: 'Insertion editor command',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
+				const selection = editor.getSelection();
+				editor.replaceSelection(this.translate(selection));
 			}
 		});
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
@@ -79,7 +95,7 @@ export default class MyPlugin extends Plugin {
 	}
 
 	onunload() {
-
+		new Notice('onunload()');
 	}
 
 	async loadSettings() {
